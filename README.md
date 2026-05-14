@@ -22,7 +22,7 @@ Power BI (for analytics)
 
 Clone the repository:
 
-git clone https://github.com/your-username/edusmart-ai.git
+git clone https://github.com/Bishoy-kamal/edusmart-ai.git
 
 Go to project folder:
 
