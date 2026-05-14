@@ -1,7 +1,14 @@
 import streamlit as st
 import PyPDF2
+from transformers import pipeline
 import pandas as pd
 import os
+
+@st.cache_resource
+def load_ai():
+    return pipeline("text-generation", model="facebook/bart-large-cnn")
+    
+ai = load_ai()
 
 st.set_page_config(page_title="EduSmart AI", page_icon="📚", layout="wide")
 
@@ -77,3 +84,32 @@ if uploaded_file:
     with tab3:
         data = pd.read_csv("students.csv")
         st.dataframe(data, use_container_width=True)
+
+    def summarize(text):
+        prompt = f"لخص النص التالي بشكل بسيط وواضح:\n{text[:1000]}"
+        result = ai(prompt, max_new_tokens=200)
+        return result[0]["generated_text"]
+
+
+def generate_questions(text):
+    prompt = f"اكتب 5 أسئلة تعليمية مع إجابات من النص التالي:\n{text[:1000]}"
+    result = ai(prompt, max_length=250, do_sample=False)
+    return result[0]["generated_text"]
+if uploaded_file:
+    text = read_pdf(uploaded_file)
+
+    st.success("تم رفع الملف بنجاح ✅")
+
+    col1, col2 = st.columns(2)
+
+    # 🧠 الخطوة 3: تلخيص
+    with col1:
+        if st.button("🧠 تلخيص ذكي"):
+            with st.spinner("جاري التحليل..."):
+                st.write(summarize(text))
+
+    # ❓ الخطوة 4: أسئلة
+    with col2:
+        if st.button("❓ توليد أسئلة"):
+            with st.spinner("جاري إنشاء الأسئلة..."):
+                st.write(generate_questions(text))
