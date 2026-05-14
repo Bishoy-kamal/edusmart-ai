@@ -86,9 +86,18 @@ if uploaded_file:
         st.dataframe(data, use_container_width=True)
 
     def summarize(text):
-        prompt = f"لخص النص التالي بشكل بسيط وواضح:\n{text[:1000]}"
-        result = ai(prompt, max_new_tokens=200)
-        return result[0]["generated_text"]
+    text = text[:800]  # مهم جدًا لتفادي overflow
+
+    prompt = "Summarize this text in simple points:\n" + text
+
+    result = ai(
+        prompt,
+        max_new_tokens=120,
+        do_sample=False,
+        truncation=True
+    )
+
+    return result[0]["generated_text"]
 
 
 def generate_questions(text):
