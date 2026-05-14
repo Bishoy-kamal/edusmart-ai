@@ -1,0 +1,79 @@
+import streamlit as st
+import PyPDF2
+import pandas as pd
+import os
+
+st.set_page_config(page_title="EduSmart AI", page_icon="📚", layout="wide")
+
+st.markdown(
+    """
+    <style>
+    .main-title {
+        text-align: center;
+        font-size: 42px;
+        font-weight: bold;
+        color: #1f77b4;
+    }
+    .sub-title {
+        text-align: center;
+        font-size: 18px;
+        color: gray;
+        margin-bottom: 20px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown('<p class="main-title">📚 EduSmart AI</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">منصة ذكية لتحليل وتلخيص الملفات التعليمية</p>', unsafe_allow_html=True)
+
+uploaded_file = st.file_uploader("ارفع ملف PDF", type="pdf")
+
+def read_pdf(file):
+    try:
+        reader = PyPDF2.PdfReader(file)
+        text = ""
+        for page in reader.pages:
+            extracted = page.extract_text()
+            if extracted:
+                text += extracted
+        return text
+    except Exception as e:
+        st.error(f"تعذر قراءة الملف: {e}")
+        return ""
+
+def simple_summarize(text):
+    sentences = text.split(".")
+    return ". ".join(sentences[:5])
+
+def save_data(filename, text):
+    words = len(text.split())
+    new_data = pd.DataFrame([{"file_name": filename, "word_count": words}])
+
+    if os.path.exists("students.csv"):
+        old_data = pd.read_csv("students.csv")
+        all_data = pd.concat([old_data, new_data], ignore_index=True)
+    else:
+        all_data = new_data
+
+    all_data.to_csv("students.csv", index=False)
+
+if uploaded_file:
+    text = read_pdf(uploaded_file)
+    save_data(uploaded_file.name, text)
+
+    st.success("تم رفع الملف وتحليله بنجاح ✅")
+
+    tab1, tab2, tab3 = st.tabs(["📄 النص", "🧠 الملخص", "📊 الإحصائيات"])
+
+    with tab1:
+        st.text_area("محتوى الملف", text, height=350)
+
+    with tab2:
+        summary = simple_summarize(text)
+        st.text_area("الملخص", summary, height=350)
+
+    with tab3:
+        data = pd.read_csv("students.csv")
+        st.dataframe(data, use_container_width=True)
