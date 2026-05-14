@@ -51,7 +51,7 @@ Learning insights
 
 👉 Add your Streamlit link here after deployment:
 
-https://edusmart-ai-hp.streamlit.app
+[https://edusmart-ai-hp.streamlit.app](https://edusmart-ai-hp.streamlit.app/)
 🎓 Use Case
 
 This project is designed for:
